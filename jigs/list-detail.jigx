@@ -1,0 +1,68 @@
+title: ' '
+
+type: jig.default
+
+header:
+  type: component.jig-header
+  options:
+    height: small
+    children:
+      type: component.image
+      options:
+        source:
+          uri: =@ctx.datasources.friendData.banerPicture
+          
+datasources:
+  friendData: 
+    type: datasource.sqlite
+    options:
+      provider: DATA_PROVIDER_DYNAMIC
+      entities:
+        - default/friends
+      query: |
+        SELECT
+          id
+          ,'$.firstName'
+          ,'$.lastName'
+          ,'$.picture'
+          ,'$.statistics'
+          ,'$.dateOfBirth'
+          ,'$.phoneNum'
+          ,'$.email'
+          ,'$.banerPicture'
+        FROM [default/friends] WHERE id = @friendIdDetail
+      queryParameters:
+        friendIdDetail: =@ctx.jig.inputs.friend
+
+children:
+  - type: component.avatar
+    options:
+      title: =$substring(@ctx.datasources.friendData.firstName, 0, 1) & $substring(@ctx.datasources.friendData.lastName, 0, 1)
+      uri: =@ctx.datasources.friendData.picture
+      size: large
+      align: center
+  - type: component.entity
+    options:
+      children:
+        - type: component.section
+          options:
+            title: Personal information
+            children:
+              - type: component.entity-field
+                options:
+                  label: Full Name
+                  value: =@ctx.datasources.friendData.firstName & ' ' & @ctx.datasources.friendData.lastName
+              - type: component.entity-field
+                options:
+                  label: Date of birth
+                  value: =$fromMillis($toMillis(@ctx.datasources.friendData.dateOfBirth), '[D1o] [MNn] [Y]')
+              - type: component.entity-field
+                options:
+                  label: Phone number
+                  value: =@ctx.datasources.friendData.phoneNum
+                  contentType: phone
+              - type: component.entity-field
+                options:
+                  label: E-mail
+                  value: =@ctx.datasources.friendData.email
+                  contentType: email
